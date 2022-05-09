@@ -11,22 +11,53 @@
     </header>
     <main>
       <div v-if="filmList.length > 0" class="box">
+        <h2>MOVIES</h2>
         <div v-for="(item, index) in filmList" :key="index" class="movie">
           <ul>
             <li>{{ item.title }}</li>
             <li>{{ item.original_title }}</li>
-            <li>{{ item.original_language }}</li>
+            <li>
+              <country-flag
+                v-if="item.original_language != null"
+                :country="item.original_language"
+                size="medium"
+              />
+              <span v-else>ND</span>
+            </li>
+            <!-- {{ item.original_language }} -->
             <li>{{ item.vote_average }}</li>
           </ul>
         </div>
       </div>
-      <div v-else>no films</div>
+      <div v-else>No Movie found</div>
+
+      <div v-if="serieList.length > 0" class="box">
+        <h2>SERIES</h2>
+        <div v-for="(item, index) in serieList" :key="index" class="movie">
+          <ul>
+            <li>{{ item.name }}</li>
+            <li>{{ item.original_name }}</li>
+            <li>
+              <country-flag
+                v-if="item.origin_country[0] != null"
+                :country="item.origin_country[0]"
+                size="medium"
+              />
+              <span v-else>ND</span>
+            </li>
+            <!-- {{ item.original_language }} -->
+            <li>{{ item.vote_average }}</li>
+          </ul>
+        </div>
+      </div>
+      <div v-else>No Series found</div>
     </main>
   </div>
 </template>
 
 <script>
 import axios from "axios";
+
 //import SiteHeader from '@/components/HeaderComponent.vue'
 //import SiteMain from '@/components/MainComponent.vue'
 
@@ -40,25 +71,44 @@ export default {
     return {
       inputString: "",
       filmList: [],
+      serieList: [],
       apiKey: "8166a56c9ae51f70996c4ce9734e81c3",
-      //apiLink: `https://api.themoviedb.org/3/search/movie?api_key=${this.apiKey}&language=en-US&page=1&include_adult=false`,
-      //apiLink: `https://api.themoviedb.org/3/search/movie?language=it-IT&page=1&api_key=${this.apiKey}&include_adult=false`,
-      apiLink: `https://api.themoviedb.org/3/search/movie?page=1&api_key=8166a56c9ae51f70996c4ce9734e81c3&language=it-IT&include_adult=false`,
+      //apiMovieLink: `https://api.themoviedb.org/3/search/movie?api_key=${this.apiKey}&language=en-US&page=1&include_adult=false`,
+      //apiMovieLink: `https://api.themoviedb.org/3/search/movie?language=it-IT&page=1&api_key=${this.apiKey}&include_adult=false`,
+      apiMovieLink: `https://api.themoviedb.org/3/search/movie?page=1&api_key=8166a56c9ae51f70996c4ce9734e81c3&language=it-IT&include_adult=false`,
+      apiSerieLink: `https://api.themoviedb.org/3/search/tv?page=1&api_key=8166a56c9ae51f70996c4ce9734e81c3&language=it-IT&include_adult=false`,
     };
   },
   methods: {
     searchMovies() {
       if (this.inputString.replace(/\s+/g, "") !== "") {
-        const queryString = this.inputString.replace(" ", "+");
+        let queryString = this.inputString.replace(/\s+/g, " ");
+        queryString = queryString.replace(" ", "+");
+        //const queryString = this.inputString;
 
-        console.log(`${this.apiLink}&query=${queryString}`);
+        console.log(`${this.apiMovieLink}&query=${queryString}`);
 
         axios
-          .get(`${this.apiLink}&query=${queryString}`)
+          .get(`${this.apiMovieLink}&query=${queryString}`)
           .then((response) => {
             this.filmList = response.data.results;
-            //this.loading = false;
+
+            this.makeFlags();
+
             console.log(this.filmList);
+          })
+          .catch((error) => {
+            console.log(`Sorry Error found: ${error}`);
+          });
+
+        axios
+          .get(`${this.apiSerieLink}&query=${queryString}`)
+          .then((response) => {
+            this.serieList = response.data.results;
+
+            //this.makeFlags();
+
+            console.log(this.serieList);
           })
           .catch((error) => {
             console.log(`Sorry Error found: ${error}`);
@@ -70,11 +120,20 @@ export default {
         console.log("hai inserito una sequenza di spazi");
       }
     },
+    makeFlags() {
+      this.filmList.forEach((item) => {
+        if (item.original_language == "en") {
+          item.original_language = "us";
+        } else if (item.original_language == "ja") {
+          item.original_language = "jp";
+        }
+      });
+    },
     /*    searchMovies() {
       const queryString = state.searchInput.replace(" ", "+");
 
       axios
-        .get(`${this.apiLink}&query=${queryString}`)
+        .get(`${this.apiMovieLink}&query=${queryString}`)
         .then((response) => {
           this.filmList = response.data.results;
           //this.loading = false;
