@@ -24,6 +24,10 @@ library.add(faStarSolid, faStarRegular)
 /* add font awesome icon component */
 Vue.component('font-awesome-icon', FontAwesomeIcon)
 
+/* BOOTSTRAP */
+const bootstrap = require('bootstrap')
+Vue.use(bootstrap)
+
 
 Vue.config.productionTip = false
 

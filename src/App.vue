@@ -1,84 +1,136 @@
 <template>
   <div id="app">
-    <header>
-      <nav>
-        <div>LOGO</div>
-        <form @submit.prevent="searchMovies">
-          <input type="text" v-model="inputString" />
-          <button type="submit">Search</button>
+    <header class="d-flex align-items-center">
+      <nav class="container d-flex align-items-center justify-content-between">
+        <div class="logo">
+          <img src="@/assets/img/logo.png" alt="logo" class="img-fluid" />
+        </div>
+        <form @submit.prevent="searchMovies" class="d-flex align-items-center">
+          <input
+            type="text"
+            v-model="inputString"
+            class="form-control me-2"
+            placeholder="Search for Movies or TV Series"
+          />
+          <button type="submit" class="btn btn-secondary">Search</button>
         </form>
       </nav>
     </header>
     <main>
-      <font-awesome-icon icon="fa-solid fa-star" /><font-awesome-icon
-        icon="fa-solid fa-star"
-      />
-      <font-awesome-icon icon="fa-regular fa-star" />
-      <font-awesome-icon icon="fa-regular fa-star" />
-      <div v-if="filmList.length > 0" class="box">
-        <h2>MOVIES</h2>
-        <div v-for="(item, index) in filmList" :key="index" class="movie">
-          <img :src="item.poster_path" :alt="item.original_title" />
-          <ul>
-            <li>{{ item.title }}</li>
-            <li>{{ item.original_title }}</li>
-            <li>
-              <country-flag
-                v-if="item.original_language != null"
-                :country="item.original_language"
-              />
-              <span v-else>ND</span>
-            </li>
-            <li>{{ item.vote_average }}</li>
-            <li>
-              <font-awesome-icon
-                v-for="i in item.vote_average"
-                :key="i"
-                icon="fa-solid fa-star"
-              />
-              <font-awesome-icon
-                v-for="n in 5 - item.vote_average"
-                :key="n"
-                icon="fa-regular fa-star"
-              />
-            </li>
-          </ul>
-        </div>
-      </div>
-      <div v-else>No Movie found</div>
+      <div class="container py-4">
+        <div v-if="filmList.length > 0">
+          <h2 class="text-center mb-4">MOVIES</h2>
 
-      <div v-if="serieList.length > 0" class="box">
-        <h2>SERIES</h2>
-        <div v-for="(item, index) in serieList" :key="index" class="movie">
-          <img :src="item.poster_path" :alt="item.original_title" />
-          <ul>
-            <li>{{ item.name }}</li>
-            <li>{{ item.original_name }}</li>
-            <li>
-              <country-flag
-                v-if="item.origin_country[0] != null"
-                :country="item.origin_country[0]"
-              />
-              <span v-else>ND</span>
-            </li>
-            <!-- {{ item.original_language }} -->
-            <li>{{ item.vote_average }}</li>
-            <li>
-              <font-awesome-icon
-                v-for="i in item.vote_average"
-                :key="i"
-                icon="fa-solid fa-star"
-              />
-              <font-awesome-icon
-                v-for="n in 5 - item.vote_average"
-                :key="n"
-                icon="fa-regular fa-star"
-              />
-            </li>
-          </ul>
+          <div
+            class="
+              row
+              row-cols-1
+              row-cols-sm-2
+              row-cols-md-3
+              row-cols-lg-4
+              row-cols-xl-5
+            "
+          >
+            <div v-for="(item, index) in filmList" :key="index" class="col p-2">
+              <div class="movie_wrapper rounded rounded-4">
+                <img
+                  :src="item.poster_path"
+                  :alt="item.original_title"
+                  class="img-fluid"
+                />
+                <ul class="movie_info list-unstyled p-3">
+                  <li>Titolo: {{ item.title }}</li>
+                  <li>Titolo originale: {{ item.original_title }}</li>
+                  <li>
+                    <country-flag
+                      v-if="item.original_language != null"
+                      :country="item.original_language"
+                    />
+                    <span v-else>ND</span>
+                  </li>
+                  <li>
+                    Voto:
+                    <font-awesome-icon
+                      v-for="i in item.vote_average"
+                      :key="i"
+                      icon="fa-solid fa-star"
+                      class="text-warning"
+                    />
+                    <font-awesome-icon
+                      v-for="n in 5 - item.vote_average"
+                      :key="n"
+                      icon="fa-regular fa-star"
+                      class="text-warning"
+                    />
+                    <span>&nbsp; ({{ item.vote_count }})</span>
+                  </li>
+                  <li>{{ item.overview }}</li>
+                </ul>
+              </div>
+            </div>
+          </div>
         </div>
+        <div v-else class="py-4 text-center lead">No Movie found</div>
+
+        <div v-if="serieList.length > 0">
+          <h2 class="text-center mb-4">TV SERIES</h2>
+
+          <div
+            class="
+              row
+              row-cols-1
+              row-cols-sm-2
+              row-cols-md-3
+              row-cols-lg-4
+              row-cols-xl-5
+              mb-4
+            "
+          >
+            <div
+              v-for="(item, index) in serieList"
+              :key="index"
+              class="col p-2"
+            >
+              <div class="movie_wrapper rounded rounded-4">
+                <img
+                  :src="item.poster_path"
+                  :alt="item.original_title"
+                  class="img-fluid"
+                />
+                <ul class="movie_info list-unstyled p-3">
+                  <li>Titolo: {{ item.name }}</li>
+                  <li>Titolo originale: {{ item.original_name }}</li>
+                  <li>
+                    <country-flag
+                      v-if="item.origin_country[0] != null"
+                      :country="item.origin_country[0]"
+                    />
+                    <span v-else>Paese: ND</span>
+                  </li>
+                  <li>
+                    Voto:
+                    <font-awesome-icon
+                      v-for="i in item.vote_average"
+                      :key="i"
+                      icon="fa-solid fa-star"
+                      class="text-warning"
+                    />
+                    <font-awesome-icon
+                      v-for="n in 5 - item.vote_average"
+                      :key="n"
+                      icon="fa-regular fa-star"
+                      class="text-warning"
+                    />
+                    <span>&nbsp; ({{ item.vote_count }})</span>
+                  </li>
+                  <li>{{ item.overview }}</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div v-else class="py-4 text-center lead">No Series found</div>
       </div>
-      <div v-else>No Series found</div>
     </main>
   </div>
 </template>
@@ -184,75 +236,71 @@ export default {
         item.vote_average = Math.round(parseFloat(item.vote_average) * 0.5);
       });
     },
-/*     makeStars(arrayName) {
-      arrayName.forEach((item) => {
-        switch (item.vote_average) {
-          case 0:
-            item.stars =
-              '<font-awesome-icon icon="fa-regular fa-star" /> <font-awesome-icon icon="fa-regular fa-star" /> <font-awesome-icon icon="fa-regular fa-star" /> <font-awesome-icon icon="fa-regular fa-star" /> <font-awesome-icon icon="fa-regular fa-star" />';
-            break;
-          case 1:
-            item.stars =
-              '<font-awesome-icon icon="fa-solid fa-star" /> <font-awesome-icon icon="fa-regular fa-star" /> <font-awesome-icon icon="fa-regular fa-star" /> <font-awesome-icon icon="fa-regular fa-star" /> <font-awesome-icon icon="fa-regular fa-star" />';
-            break;
-          case 2:
-            item.stars =
-              '<font-awesome-icon icon="fa-solid fa-star" /> <font-awesome-icon icon="fa-solid fa-star" /> <font-awesome-icon icon="fa-regular fa-star" /> <font-awesome-icon icon="fa-regular fa-star" /> <font-awesome-icon icon="fa-regular fa-star" />';
-            break;
-          case 3:
-            item.stars =
-              '<font-awesome-icon icon="fa-solid fa-star" /> <font-awesome-icon icon="fa-solid fa-star" /> <font-awesome-icon icon="fa-solid fa-star" /> <font-awesome-icon icon="fa-regular fa-star" /> <font-awesome-icon icon="fa-regular fa-star" />';
-            break;
-          case 4:
-            item.stars =
-              '<font-awesome-icon icon="fa-solid fa-star" /> <font-awesome-icon icon="fa-solid fa-star" /> <font-awesome-icon icon="fa-solid fa-star" /> <font-awesome-icon icon="fa-solid fa-star" /> <font-awesome-icon icon="fa-regular fa-star" />';
-            break;
-          case 5:
-            item.stars =
-              '<font-awesome-icon icon="fa-solid fa-star" /> <font-awesome-icon icon="fa-solid fa-star" /> <font-awesome-icon icon="fa-solid fa-star" /> <font-awesome-icon icon="fa-solid fa-star" /> <font-awesome-icon icon="fa-solid fa-star" />';
-        }
-      });
-    }, */
   },
 };
 </script>
 
 <style lang="scss">
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  //margin-top: 60px;
-}
+@import "@/assets/scss/style.scss";
 
 header {
-  background-color: black;
+  background-color: $bg_header;
   color: white;
+
+  height: 75px;
+
+  .logo > img {
+    height: 40px;
+    cursor: pointer;
+  }
 }
 main {
-  background-color: lightgrey;
+  background-color: $bg_main;
 
-  .box {
-    display: flex;
-    flex-wrap: wrap;
-    .movie {
-      border: 1px solid black;
-      padding: 1rem;
-      margin: 0.5rem;
+  color: $light_theme;
 
-      ul {
-        list-style: none;
-        color: red;
-      }
+  min-height: calc(100vh - 75px);
+
+  .row {
+    margin-bottom: 2rem;
+  }
+
+  .movie_wrapper {
+    position: relative;
+
+    height: 100%;
+
+    overflow: hidden;
+
+    &:hover .movie_info {
+      display: block;
+      z-index: 10;
+    }
+
+    img {
+      object-fit: cover;
+      height: 100%;
+    }
+
+    .movie_info {
+      display: none;
+
+      position: absolute;
+      top: 0;
+      left: 0;
+
+      height: 100%;
+      width: 100%;
+
+      background-color: $card_theme;
+
+      opacity: 0.95;
+
+      overflow-y: scroll;
+
+      //text-overflow: ellipsis;
     }
   }
+
 }
 </style>
