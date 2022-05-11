@@ -48,14 +48,14 @@
                   class="img-fluid"
                 />
                 <ul class="movie_info list-unstyled p-3">
-                  <li>Titolo: {{ item.title }}</li>
+                  <li class="lead mb-1 mb-1">Titolo: {{ item.title }}</li>
                   <li>Titolo originale: {{ item.original_title }}</li>
                   <li>
                     <country-flag
                       v-if="item.original_language != null"
                       :country="item.original_language"
                     />
-                    <span v-else>ND</span>
+                    <span v-else>Paese: ND</span>
                   </li>
                   <li>
                     Voto:
@@ -71,41 +71,27 @@
                       icon="fa-regular fa-star"
                       class="text-warning"
                     />
-                    <span>&nbsp; ({{ item.vote_count }})</span>
+                    <span class="fs_sm">&nbsp; ({{ item.vote_count }})</span>
                   </li>
-                  <!--              <li v-show="item.cast.length > 0">
-                    Cast:
-                    <span v-if="item.cast.length > 4">
-                      <span v-for="a in 5" :key="a">
-                        <span v-if="index < 4">{{ item.cast[a].name }},</span>
-                        <span v-else-if="index == 4">{{
-                          item.cast[a].name
-                        }}, ...</span>
+                  <li v-show="item.genres.length > 0" class="my-2 fs_sm">
+                    Genere:&nbsp;
+                    <span v-for="(genre, num) in item.genres" :key="genre.id">
+                      <span v-if="num != item.genres.length - 1">
+                        {{ genre.name }},&nbsp;
                       </span>
+                      <span v-else>{{ genre.name }}.</span>
                     </span>
-                    <span v-else>
-                      <span v-for="a in item.cast" :key="a">
-                        <span v-if="index < item.cast.length">{{ item.cast[a].name }},</span>
-                        <span v-else-if="index == item.cast.length">{{
-                          item.cast[a].name
-                        }}.</span>
+                  </li>
+                  <li v-show="item.cast.length > 0" class="my-2 fs_sm">
+                    Cast:&nbsp;
+                    <span v-for="(actor, num) in item.cast" :key="actor.id">
+                      <span v-if="num != item.cast.length - 1">
+                        {{ actor.name }},&nbsp;
                       </span>
+                      <span v-else>{{ actor.name }}.</span>
                     </span>
-                  </li> -->
-                  <!--                  <li v-show="true">
-                    Cast:
-                      <span v-for="a in item.cast" :key="a">
-                        <span v-if="index < item.cast.length">{{ item.cast[a].name }},</span>
-                        <span v-else-if="index == item.cast.length">{{
-                          item.cast[a].name
-                        }}.</span>
-                      </span>
-                  </li> -->
-<!--                   <li v-show="item.cast.length > 0">
-                    {{ item.cast[0].name }}
-
-                  </li> -->
-                  <li>{{ item.overview }}</li>
+                  </li>
+                  <li class="lead fs_sm">{{ item.overview }}</li>
                 </ul>
               </div>
             </div>
@@ -139,7 +125,7 @@
                   class="img-fluid"
                 />
                 <ul class="movie_info list-unstyled p-3">
-                  <li>Titolo: {{ item.name }}</li>
+                  <li class="lead mb-1">Titolo: {{ item.name }}</li>
                   <li>Titolo originale: {{ item.original_name }}</li>
                   <li>
                     <country-flag
@@ -162,18 +148,27 @@
                       icon="fa-regular fa-star"
                       class="text-warning"
                     />
-                    <span>&nbsp; ({{ item.vote_count }})</span>
+                    <span class="fs_sm">&nbsp; ({{ item.vote_count }})</span>
                   </li>
-<!--                   <li>
-                    Cast:
-                    <span v-for="a in 5" :key="a">
-                      <span v-if="index < 4">{{ item.cast[a].name }},</span>
-                      <span v-else-if="index == 4">{{
-                        item.cast[a].name
-                      }}</span>
+                  <li v-show="item.genres.length > 0" class="my-2 fs_sm">
+                    Genere:&nbsp;
+                    <span v-for="(genre, num) in item.genres" :key="genre.id">
+                      <span v-if="num != item.genres.length - 1">
+                        {{ genre.name }},&nbsp;
+                      </span>
+                      <span v-else>{{ genre.name }}.</span>
                     </span>
-                  </li> -->
-                  <li>{{ item.overview }}</li>
+                  </li>
+                  <li v-show="item.cast.length > 0" class="my-2 fs_sm">
+                    Cast:
+                    <span v-for="(actor2, num2) in item.cast" :key="actor2.id">
+                      <span v-if="num2 != item.cast.length - 1">
+                        {{ actor2.name }},&nbsp;
+                      </span>
+                      <span v-else>{{ actor2.name }}.</span>
+                    </span>
+                  </li>
+                  <li class="lead fs_sm">{{ item.overview }}</li>
                 </ul>
               </div>
             </div>
@@ -230,7 +225,11 @@ export default {
 
             this.getCast(this.filmList, "movie");
 
+            this.getGenres(this.filmList, "movie");
+
             console.log("Movies found:", this.filmList);
+
+            //console.log('ultimo log',this.filmList[0].cast);
           })
           .catch((error) => {
             console.log(`Sorry Error found: ${error}`);
@@ -248,6 +247,8 @@ export default {
             this.roundVotes(this.serieList);
 
             this.getCast(this.serieList, "tv");
+
+            this.getGenres(this.serieList, "tv");
 
             console.log("Series found:", this.serieList);
           })
@@ -289,37 +290,52 @@ export default {
       });
     },
     getCast(arrayName, movieOrTv) {
-      arrayName.forEach((item, index) => {
-        item.cast = [];
-
+      arrayName.forEach((item) => {
         axios
           .get(
             `https://api.themoviedb.org/3/${movieOrTv}/${item.id}/credits?api_key=${this.apiKey}&language=it-IT`
           )
           .then((response) => {
             //console.log('api cast response:', response);
-            item.cast = response.data.cast;
-            //this.$set(item, 'cast', response.data.cast)
-
-       /*      if (response.data.cast > 0) {
-              response.data.cast.forEach(actor => {
-                const actor_object = {name: actor.name};
-
-                item.cast.push(actor_object)
-
-              })
-            } */
-
-
+            //item.cast = response.data.cast;
+            if (response.data.cast.length <= 5) {
+              this.$set(item, "cast", response.data.cast);
+            } else {
+              this.$set(item, "cast", response.data.cast.slice(0, 5));
+            }
           })
           .catch((error) => {
             console.log(`Sorry Error found getting the cast: ${error}`);
           });
 
-        
-          console.log(`array cast ${index}:`, item.cast);
-        
+        //console.log(`array cast ${index}:`, item.cast);
       });
+
+      console.log(`array cast:`, arrayName);
+    },
+    getGenres(arrayName, movieOrTv) {
+      arrayName.forEach((item) => {
+        axios
+          .get(
+            `https://api.themoviedb.org/3/${movieOrTv}/${item.id}?api_key=${this.apiKey}&language=it-IT`
+          )
+          .then((response) => {
+            //console.log('api GENRE response:', response);
+            //item.cast = response.data.cast;
+            if (response.data.genres.length <= 5) {
+              this.$set(item, "genres", response.data.genres);
+            } else {
+              this.$set(item, "genres", response.data.genres.slice(0, 5));
+            }
+          })
+          .catch((error) => {
+            console.log(`Sorry Error found getting the cast: ${error}`);
+          });
+
+        //console.log(`array cast ${index}:`, item.cast);
+      });
+
+      //console.log(`array cast:`, arrayName);
     },
   },
 };
