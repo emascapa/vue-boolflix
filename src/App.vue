@@ -3,13 +3,22 @@
     <header class="d-flex align-items-center">
       <nav class="container d-flex align-items-center justify-content-between">
         <div class="logo">
-          <img src="@/assets/img/logo.png" alt="logo" class="img-fluid" />
+          <img
+            src="@/assets/img/logo-sm.png"
+            alt="logo"
+            class="img-fluid d-block d-md-none"
+          />
+          <img
+            src="@/assets/img/logo.png"
+            alt="logo"
+            class="img-fluid d-none d-md-block"
+          />
         </div>
         <form @submit.prevent="searchMovies" class="d-flex align-items-center">
           <input
             type="text"
             v-model="inputString"
-            class="form-control me-2"
+            class="form-control mx-2"
             placeholder="Search for Movies or TV Series"
           />
           <button type="submit" class="btn btn-secondary">Search</button>
@@ -58,12 +67,44 @@
                     />
                     <font-awesome-icon
                       v-for="n in 5 - item.vote_average"
-                      :key="n"
+                      :key="n + item.vote_average"
                       icon="fa-regular fa-star"
                       class="text-warning"
                     />
                     <span>&nbsp; ({{ item.vote_count }})</span>
                   </li>
+                  <!--              <li v-show="item.cast.length > 0">
+                    Cast:
+                    <span v-if="item.cast.length > 4">
+                      <span v-for="a in 5" :key="a">
+                        <span v-if="index < 4">{{ item.cast[a].name }},</span>
+                        <span v-else-if="index == 4">{{
+                          item.cast[a].name
+                        }}, ...</span>
+                      </span>
+                    </span>
+                    <span v-else>
+                      <span v-for="a in item.cast" :key="a">
+                        <span v-if="index < item.cast.length">{{ item.cast[a].name }},</span>
+                        <span v-else-if="index == item.cast.length">{{
+                          item.cast[a].name
+                        }}.</span>
+                      </span>
+                    </span>
+                  </li> -->
+                  <!--                  <li v-show="true">
+                    Cast:
+                      <span v-for="a in item.cast" :key="a">
+                        <span v-if="index < item.cast.length">{{ item.cast[a].name }},</span>
+                        <span v-else-if="index == item.cast.length">{{
+                          item.cast[a].name
+                        }}.</span>
+                      </span>
+                  </li> -->
+<!--                   <li v-show="item.cast.length > 0">
+                    {{ item.cast[0].name }}
+
+                  </li> -->
                   <li>{{ item.overview }}</li>
                 </ul>
               </div>
@@ -117,12 +158,21 @@
                     />
                     <font-awesome-icon
                       v-for="n in 5 - item.vote_average"
-                      :key="n"
+                      :key="n + item.vote_average"
                       icon="fa-regular fa-star"
                       class="text-warning"
                     />
                     <span>&nbsp; ({{ item.vote_count }})</span>
                   </li>
+<!--                   <li>
+                    Cast:
+                    <span v-for="a in 5" :key="a">
+                      <span v-if="index < 4">{{ item.cast[a].name }},</span>
+                      <span v-else-if="index == 4">{{
+                        item.cast[a].name
+                      }}</span>
+                    </span>
+                  </li> -->
                   <li>{{ item.overview }}</li>
                 </ul>
               </div>
@@ -152,6 +202,8 @@ export default {
       inputString: "",
       filmList: [],
       serieList: [],
+      suggestedMovies: [],
+      suggestedSeries: [],
       apiKey: "8166a56c9ae51f70996c4ce9734e81c3",
       apiMovieLink: `https://api.themoviedb.org/3/search/movie?page=1&api_key=8166a56c9ae51f70996c4ce9734e81c3&language=it-IT&include_adult=false`,
       apiSerieLink: `https://api.themoviedb.org/3/search/tv?page=1&api_key=8166a56c9ae51f70996c4ce9734e81c3&language=it-IT&include_adult=false`,
@@ -176,9 +228,9 @@ export default {
 
             this.roundVotes(this.filmList);
 
-            //this.makeStars(this.filmList);
+            this.getCast(this.filmList, "movie");
 
-            console.log(this.filmList);
+            console.log("Movies found:", this.filmList);
           })
           .catch((error) => {
             console.log(`Sorry Error found: ${error}`);
@@ -195,9 +247,9 @@ export default {
 
             this.roundVotes(this.serieList);
 
-            //this.makeStars(this.serieList);
+            this.getCast(this.serieList, "tv");
 
-            console.log(this.serieList);
+            console.log("Series found:", this.serieList);
           })
           .catch((error) => {
             console.log(`Sorry Error found: ${error}`);
@@ -234,6 +286,39 @@ export default {
     roundVotes(arrayName) {
       arrayName.forEach((item) => {
         item.vote_average = Math.round(parseFloat(item.vote_average) * 0.5);
+      });
+    },
+    getCast(arrayName, movieOrTv) {
+      arrayName.forEach((item, index) => {
+        item.cast = [];
+
+        axios
+          .get(
+            `https://api.themoviedb.org/3/${movieOrTv}/${item.id}/credits?api_key=${this.apiKey}&language=it-IT`
+          )
+          .then((response) => {
+            //console.log('api cast response:', response);
+            item.cast = response.data.cast;
+            //this.$set(item, 'cast', response.data.cast)
+
+       /*      if (response.data.cast > 0) {
+              response.data.cast.forEach(actor => {
+                const actor_object = {name: actor.name};
+
+                item.cast.push(actor_object)
+
+              })
+            } */
+
+
+          })
+          .catch((error) => {
+            console.log(`Sorry Error found getting the cast: ${error}`);
+          });
+
+        
+          console.log(`array cast ${index}:`, item.cast);
+        
       });
     },
   },
@@ -301,6 +386,5 @@ main {
       //text-overflow: ellipsis;
     }
   }
-
 }
 </style>
